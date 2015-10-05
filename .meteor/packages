@@ -24,3 +24,6 @@ cfs:filesystem
 twbs:bootstrap
 cfs:ui
 ejson
+accounts-password
+accounts-ui
+cfs:ejson-file

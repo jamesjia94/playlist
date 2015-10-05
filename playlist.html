@@ -1,12 +1,11 @@
-<head>
-    <title>Video Playlist</title>
-</head>
-
 <template name="add_videos">
     <input type="file" name="Upload File" class="file_input">
 </template>
 
 <template name="home">
+</template>
+
+<template name="videos">
     {{> add_videos}}
 
     {{#if first_video}}
@@ -57,4 +56,51 @@
         {{/each}}
       </figcaption>
     </figure>
+</template>
+
+<template name="register">
+    <h2>Register</h2>
+</template>
+
+<template name="login">
+    <h2>Login</h2>
+</template>
+
+<template name="main">
+    <title>Video Playlist</title>
+    <h1>Playlist Manager</h1>
+    {{> navigation}}
+    {{> campaigns}}
+    {{> yield}}
+    <hr />
+    <p>&copy; 2015 Playlist Manager.</p>
+</template>
+
+<template name="navigation">
+    <ul>
+        <li><a href="{{pathFor route='home'}}">Home</a></li>
+        <li><a href="{{pathFor route='register'}}">Register</a></li>
+        <li><a href="{{pathFor route='login'}}">Login</a></li>
+    </ul>
+</template>
+
+<template name="addCampaign">
+    <form>Create a campaign:
+        <input type="text" placeholder="Campaign name here..." name="campaignName">
+    </form>
+</template>
+
+<template name="campaigns">
+    <h2>Campaigns</h2>
+    {{> addCampaign}}
+    <ul>
+        {{#each campaign}}
+            <li><a href="/campaign/{{_id}}">{{name}}</a></li>
+        {{/each}}
+    </ul>
+</template>
+
+<template name="campaignPage">
+    <h2>Playlist {{name}}: Videos</h2>
+    {{> videos}}
 </template>

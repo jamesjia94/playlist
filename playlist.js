@@ -1,37 +1,74 @@
-Videos = new FS.Collection("videos", {
+videoStore = new FS.Collection("videoFiles", {
   stores: [
-    new FS.Store.FileSystem("videos")
+    new FS.Store.FileSystem("videoFiles")
   ]
 });
 
+Campaigns = new Meteor.Collection('campaigns');
+
+Videos = new Meteor.Collection('videos');
+
 if (Meteor.isClient) {
-  Template.registerHelper('videos', function() {
-      return Videos.find()
+  Template.addCampaign.events({
+    'submit form': function(event){
+      event.preventDefault();
+      var campaignName = $('[name=campaignName]').val();
+      Campaigns.insert({
+          name: campaignName
+      });
+      $('[name=campaignName]').val('');
+    }
   });
 
-  Template.home.helpers({
+  Template.campaigns.helpers({
+    'campaign': function(){
+        return Campaigns.find({}, {sort: {name: 1}});
+    }
+  });
+
+  Template.videos.helpers({
+    'videos': function() {
+      var currentCampaign = this._id;
+      var videos = Videos.find({campaignId: currentCampaign});
+      var return_val = videos.map(function (v) {return videoStore.findOne({_id: v["file_id"]})});
+      return return_val;
+    },
     'first_video': function() {
-      return Videos.findOne()
+      var currentCampaign = this._id;
+      return Videos.findOne({campaignId: currentCampaign});
     }
   });
 
   Template.add_videos.events({
-    'change .file_input': function(event, template) {
+    'change .file_input': function(event) {
+      var currentCampaign = this._id;
       FS.Utility.eachFile(event, function(file) {
-        Videos.insert(file);
-      })
+        var file_obj = videoStore.insert(file);
+        Videos.insert({
+          campaignId: currentCampaign,
+          file_id: file_obj._id
+        });
+      });
+    }
+  });
+
+  Template._fs_DeleteButton2.events({
+    'click button': function(event, template){
+      var file = template.data.fileObj._id;
+      var video_id = Videos.findOne({file_id: file})._id;
+      Videos.remove(video_id);
     }
   });
 
   Template.display_videos.helpers({
     'first_video_url': function() {
       return {
-        src: Videos.findOne().url(),
+        src: videoStore.findOne().url(),
         type: "video/mp4"
       }
     },
     'is_first_video': function() {
-      return Videos.findOne().url() === this.url()
+      return videoStore.findOne().url() === this.url()
     }
   });
 
@@ -113,7 +150,7 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  Videos.allow({
+  videoStore.allow({
     'insert': function() {
       return true;
     }
